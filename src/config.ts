@@ -17,7 +17,7 @@ export const DEFAULT_CONFIG = {
   /** Interpolate while we have low resolution data. */
   interpolate: false,
   /** Zoom in 1D charts. */
-  zoom: true,
+  zoom: false,
 
   //--------------
   // configuration

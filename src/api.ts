@@ -1,4 +1,5 @@
 import { View as VgView } from "vega";
+import { Config } from ".";
 import { Interval } from "./basic";
 
 /**
@@ -13,6 +14,12 @@ export interface AbstractView {
 
   /** The html element to attach the view to. If null, the view will be ignored. */
   el?: HTMLElement | null;
+
+  /** Configurations to override if availabel */
+  overrideConfig?: Partial<Config>;
+
+  /** Callback to get the current data from the view */
+  onData?: (data: any) => void;
 }
 
 /**

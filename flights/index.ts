@@ -1,143 +1,185 @@
 import { App, ArrowDB, Logger, Views } from "../src";
-import { createElement } from "./utils";
+import { stateCalculation, Vega1DData } from './stateCalc';
 
-document.getElementById("app")!.innerText = "";
+// document.getElementById("app")!.innerText = "";
 
 type ViewName =
-  | "DISTANCE"
-  | "DEP_TIME"
-  | "ARR_TIME"
-  | "AIR_TIME"
-  | "ARR_DELAY"
-  | "DEP_DELAY"
-  | "FL_DATE"
-  | "DEP_DELAY_ARR_DELAY"
-  | "COUNT";
+  | "user_count"
+  | "user_count2"
+  | "user_history"
+  | "recency"
+  | "frequency"
+  | "monetary"
+  | "avg_txn_per_month"
+  | "avg_spend_per_month"
+  | "user_history_frequency"
+  | "user_history_recency"
+  | "state_code";
 
 type DimensionName =
-  | "ARR_DELAY"
-  | "ARR_TIME"
-  | "DISTANCE"
-  | "DEP_DELAY"
-  | "AIR_TIME"
-  | "DEP_TIME"
-  | "FL_DATE";
+  | "user_history"
+  | "recency"
+  | "frequency"
+  | "monetary"
+  | "avg_txn_per_month"
+  | "avg_spend_per_month"
+  | "state_code";
 
 const views: Views<ViewName, DimensionName> = new Map();
 
-views.set("COUNT", {
-  title: "Flights selected",
+views.set("user_count", {
+  title: "User Count",
   type: "0D",
-  el: createElement("count")
+  el: document.getElementById("usercount")
 });
-views.set("FL_DATE", {
-  title: "Flight Date",
+views.set("user_count2", {
+  title: "User Count",
+  type: "0D",
+  el: document.getElementById("usercount2")
+});
+views.set("user_history", {
+  title: "user_history",
   type: "1D",
-  el: createElement("date"),
+  el: document.getElementById("userhistory"),
   dimension: {
-    name: "FL_DATE",
-    bins: 25,
-    // note that months start at 0!
-    // extent: [new Date(2005, 11, 25).getTime(), new Date(2006, 1, 5).getTime()], // 10k
-    extent: [new Date(2005, 11, 25).getTime(), new Date(2006, 2, 5).getTime()], // 1m
-    // extent: [new Date(2006, 11, 10).getTime(), new Date(2007, 1, 10).getTime()], // 10m
-    // extent: [new Date(2005, 11, 29).getTime(), new Date(2006, 1, 5).getTime()], // 200k
-    format: "%Y-%m-%d",
-    time: true
+    name: "user_history",
+    bins: 100,
+    extent: [0, 750],
+    format: 'd'
+  },
+  overrideConfig: {
+    histogramWidth: 800,
   }
 });
-views.set("DISTANCE", {
-  title: "Distance in Miles",
+views.set("recency", {
+  title: "recency",
   type: "1D",
-  el: createElement("distance"),
+  el: document.getElementById("recency"),
   dimension: {
-    name: "DISTANCE",
-    bins: 25,
-    extent: [0, 4000],
+    name: "recency",
+    bins: 100,
+    extent: [0, 750],
+    format: "d"
+  },
+  overrideConfig: {
+    histogramWidth: 800,
+  }
+});
+views.set("frequency", {
+  title: "frequency",
+  type: "1D",
+  el: document.getElementById("frequency"),
+  dimension: {
+    name: "frequency",
+    bins: 50,
+    extent: [0, 1000],
     format: "d"
   }
 });
-views.set("ARR_TIME", {
-  title: "Arrival Time",
+views.set("monetary", {
+  title: "monetary",
   type: "1D",
-  el: createElement("arrival"),
+  el: document.getElementById("monetary"),
   dimension: {
-    name: "ARR_TIME",
-    bins: 24,
-    extent: [0, 24],
+    name: "monetary",
+    bins: 50,
+    // extent: [0, 4000],
     format: ".1f"
   }
 });
-views.set("DEP_TIME", {
-  title: "Departure Time",
+views.set("avg_txn_per_month", {
+  title: "avg_txn_per_month",
   type: "1D",
-  el: createElement("departure"),
+  el: document.getElementById("avgtxnpermonth"),
   dimension: {
-    name: "DEP_TIME",
-    bins: 24,
-    extent: [0, 24],
+    name: "avg_txn_per_month",
+    bins: 50,
+    extent: [0, 100],
     format: ".1f"
   }
 });
-// views.set("DEP_DELAY", {
-//   title: "Departure Delay in Minutes",
-//   type: "1D",
-//   el: createElement("dep_delay"),
-//   dimension: {
-//     name: "DEP_DELAY",
-//     bins: 25,
-//     extent: [-20, 60],
-//     format: ".1f"
-//   }
-// });
-// views.set("ARR_DELAY", {
-//   title: "Arrival Delay in Minutes",
-//   type: "1D",
-//   el: createElement("arr_delay"),
-//   dimension: {
-//     name: "ARR_DELAY",
-//     bins: 25,
-//     extent: [-20, 60],
-//     format: ".1f"
-//   }
-// });
-views.set("AIR_TIME", {
-  title: "Airtime in Minutes",
+
+views.set("avg_spend_per_month", {
+  title: "avg_spend_per_month",
   type: "1D",
-  el: createElement("airtime"),
+  el: document.getElementById("avgspendpermonth"),
   dimension: {
-    name: "AIR_TIME",
-    bins: 25,
-    extent: [0, 500],
-    format: "d"
+    name: "avg_spend_per_month",
+    bins: 50,
+    extent: [0, 5000],
+    format: ".1f"
   }
 });
-views.set("DEP_DELAY_ARR_DELAY", {
-  title: "Arrival and Departure Delay in Minutes",
+
+views.set("state_code", {
+  title: "state_code",
+  type: "1D",
+  el: document.getElementById("statecode"),
+  dimension: {
+    name: "state_code",
+    bins: 53,
+    extent: [0, 53],
+    format: ".1f"
+  },
+  onData: (data: Vega1DData) => {
+    console.log("I got data from this chart", data)
+    stateCalculation(data);
+  },
+  overrideConfig: {
+    histogramWidth: 800,
+  }
+});
+
+
+views.set("user_history_frequency", {
+  title: "user_history_frequency",
   type: "2D",
-  el: createElement("delay"),
+  el: document.getElementById("userhistoryfrequency"),
   dimensions: [
     {
-      title: "Departure Delay",
-      name: "DEP_DELAY",
-      bins: 25,
-      extent: [-20, 60],
+      title: "user_history",
+      name: "user_history",
+      bins: 100,
+      extent: [0, 750],
       format: "d"
     },
     {
-      title: "Arrival Delay",
-      name: "ARR_DELAY",
-      bins: 25,
-      extent: [-20, 60],
+      title: "frequency",
+      name: "frequency",
+      bins: 100,
+      extent: [0, 5000],
       format: "d"
     }
   ]
 });
 
-const url = require("../data/flights-1m.arrow");
+views.set("user_history_recency", {
+  title: "user_history_recency",
+  type: "2D",
+  el: document.getElementById("userhistoryrecency"),
+  dimensions: [
+    {
+      title: "user_history",
+      name: "user_history",
+      bins: 50,
+      extent: [0, 750],
+      format: "d"
+    },
+    {
+      title: "recency",
+      name: "recency",
+      bins: 50,
+      extent: [0, 750],
+      format: "d"
+    }
+  ]
+});
+
+const url2 = require("../data/fetch_user_data.arrow");
+
 // const url =
 //   "https://media.githubusercontent.com/media/uwdata/flights-arrow/master/flights-10m.arrow";
-const db = new ArrowDB<ViewName, DimensionName>(url);
+const db = new ArrowDB<ViewName, DimensionName>(url2);
 
 let logger: Logger<ViewName> | undefined;
 
@@ -155,15 +197,18 @@ const iPad = !!navigator.userAgent.match(/iPad/i);
 
 new App(views, db, {
   config: {
-    barWidth: 600,
+    barWidth: 900,
+    histogramWidth: 350,
+    heatmapWidth: 275,
+    toggleUnfiltered: false,
     ...(iPad
       ? {
-          barWidth: 450,
-          histogramWidth: 450,
-          histogramHeight: 120,
-          heatmapWidth: 300,
-          prefetchOn: "mousedown"
-        }
+        barWidth: 450,
+        histogramWidth: 450,
+        histogramHeight: 120,
+        heatmapWidth: 300,
+        prefetchOn: "mousedown"
+      }
       : {})
   },
   logger: logger,
